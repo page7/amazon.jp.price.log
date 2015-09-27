@@ -9,6 +9,7 @@
     <!-- Bootstrap -->
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
     <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="./template/css/main.css">
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -24,9 +25,20 @@
     <div class="container">
         <h1>Hi Amazon~!</h1>
 
-        <div class="row" style="margin-top:20px;">
+        <div class="alert alert-danger" role="alert" style="display:none">数据保存错误</div>
+
+        <div class="row operate operate-header" style="margin-top:20px;">
             <div class="col-xs-4 col-sm-6 col-md-6 col-lg-8 form-inline">
-                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#add">Add New</button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default"  data-toggle="modal" data-target="#add">Add New</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="refresh-all" href="javascript:;">Refresh All</a></li>
+                    </ul>
+                </div>
             </div>
 
             <div class="col-xs-8 col-sm-6 col-md-6 col-lg-4 text-right">
@@ -38,11 +50,6 @@
                 </div>
             </div>
         </div>
-
-        <style>
-        .thumb {width:90px; height:90px; background-size:contain; background-repeat:no-repeat; background-position:center center; }
-        .table>tbody>tr>td { vertical-align:middle; }
-        </style>
 
         <div class="table-responsive">
             <table id="list" class="table table-striped" style="margin-top:20px;">
@@ -64,11 +71,19 @@
             </table>
         </div>
 
-        <div class="row" style="margin-top:20px; padding-bottom:30px;">
+        <div class="row operate operate-footer" style="margin-top:20px; padding-bottom:30px;">
             <div class="col-xs-4 col-sm-6 col-md-6 col-lg-8 form-inline">
-                <button type="button" class="btn btn-default" data-toggle="modal" data-target="#add">Add New</button>
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default"  data-toggle="modal" data-target="#add">Add New</button>
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <span class="caret"></span>
+                        <span class="sr-only">Toggle Dropdown</span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="refresh-all" href="javascript:;">Refresh All</a></li>
+                    </ul>
+                </div>
             </div>
-
         </div>
 
     </div>
@@ -102,73 +117,119 @@
     <!-- Include all compiled plugins (below), or include individual files as needed -->
     <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 
-    <script>
-    $(function(){
-        !function(btn, url, list){
-            var btn = $(btn),
-                url = $(url),
-                list = $(list),
-                th = list.find("thead th"),
-                tbody = list.children("tbody"),
-                col = 0;
-            th.each(function(){
-                if (c = $(this).attr("colspan"))
-                    c = parseInt(c, 10);
-                else
-                    c = 1;
-                col += c;
-            });
-
-            btn.click(function(){
-                btn.button('loading');
-                tbody.prepend("<tr id='temp'><td colspan='"+col+"' class='text-center'>正在创建..</td></tr>");
-                $.ajax({
-                    type : "POST",
-                    url  : "./refresh.php",
-                    data : {url:url.val()},
-                    success : function(data){
-                        btn.button('reset');
-                        if (data.s == 0){
-                            url.val('');
-                            $("#temp").after(data.rs).remove();
-                        }else{
-
-                        }
-                    },
-                    dataType : "json",
-                    timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
-                });
-            });
-        }("#add .modal-footer .btn-primary", "#url", "#list");
-
-        !function(list, bindobj){
-            var list = $(list);
-            list.on("click", bindobj, function(){
-                var btn = $(this),
-                    tr = btn.parents("tr").eq(0),
-                    id = tr.data("id");
-                btn.prop("disabled", true);
-                $.ajax({
-                    type : "POST",
-                    url  : "./refresh.php",
-                    data : {id:id},
-                    success : function(data){
-                        btn.prop("disabled", false);
-                        if (data.s == 0){
-                            var _tr = $(data.rs);
-                            tr.html(_tr.html());
-                        }else{
-
-                        }
-                    },
-                    dataType : "json",
-                    timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
-                });
-            });
-        }("#list", ".btn-refresh");
-
+<!-- project script -->
+<script>
+$(function(){
+    $(window).scroll(function(){
+        var win = $(this),
+            alert = $(".alert");
+        if (win.scrollTop() > 50) {
+            alert.addClass("alert-fixed");
+        }else{
+            alert.removeClass("alert-fixed");
+        }
     });
-    </script>
+
+    !function(btn, url, list){
+        var btn = $(btn),
+            url = $(url),
+            list = $(list),
+            th = list.find("thead th"),
+            tbody = list.children("tbody"),
+            col = 0;
+        th.each(function(){
+            if (c = $(this).attr("colspan"))
+                c = parseInt(c, 10);
+            else
+                c = 1;
+            col += c;
+        });
+
+        btn.click(function(){
+            btn.button('loading');
+            tbody.prepend("<tr id='temp'><td colspan='"+col+"' class='text-center'><span class='glyphicon glyphicon-refresh loading'></span>正在创建..</td></tr>");
+            $.ajax({
+                type : "POST",
+                url  : "./refresh.php",
+                data : {url:url.val()},
+                success : function(data){
+                    btn.button('reset');
+                    if (data.s == 0){
+                        url.val('');
+                        var tr = $(data.rs);
+                        $("#temp").after(tr).remove();
+                        tr.trigger("create");
+                    }else{
+                        $("#alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                    }
+                },
+                dataType : "json",
+                timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
+            });
+        });
+    }("#add .modal-footer .btn-primary", "#url", "#list");
+
+    !function(list, bindobj){
+        var list = $(list);
+        list.on("click", bindobj, function(){
+            var btn = $(this),
+                tr = btn.parents("tr").eq(0),
+                id = tr.data("id");
+            btn.prop("disabled", true).addClass("loading");
+            $.ajax({
+                type : "POST",
+                url  : "./refresh.php",
+                data : {id:id},
+                success : function(data){
+                    btn.prop("disabled", false).removeClass("loading");
+                    if (data.s == 0){
+                        var _tr = $(data.rs);
+                        tr.html(_tr.html()).trigger("refresh");
+                    }else{
+                        $("#alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                    }
+                },
+                dataType : "json",
+                timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
+            });
+        });
+    }("#list", ".btn-refresh");
+
+    !function(btn, btnlist){
+        var btnlist = $(btnlist);
+        $(btn).click(function(){
+                var refresh = function(btn){
+                    var tr = btn.parents("tr").eq(0),
+                        id = tr.data("id");
+                    tr.addClass("warning");
+                    btn.addClass("loading");
+                    $.ajax({
+                        type : "POST",
+                        url  : "./refresh.php",
+                        data : {id:id},
+                        success : function(data){
+                            tr.removeClass("warning");
+                            btn.prop("disabled", false).removeClass("loading");
+                            if (data.s == 0){
+                                var _tr = $(data.rs);
+                                tr.html(_tr.html()).trigger("refresh");
+                                if (tr.next().length) {
+                                    refresh(tr.next().find(btnlist));
+                                }
+                            }else{
+                                tr.addClass("danger");
+                            }
+                        },
+                        dataType : "json",
+                        timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
+                    });
+                };
+            var first = btnlist.prop("disabled", true).eq(0);
+            refresh(first);
+        });
+    }(".refresh-all", ".btn-refresh");
+});
+</script>
 
     <?php \pt\tool\action::exec('footer'); ?>
 

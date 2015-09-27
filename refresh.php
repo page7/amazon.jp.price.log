@@ -128,6 +128,7 @@ if (!$db -> commit())
     json_return(null, 9, 'Load page\'s data fail, please retry.');
 }
 
+$product['id'] = $id;
 template::assign('v', $product);
 $html = template::fetch('_tr');
 

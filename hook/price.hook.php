@@ -19,14 +19,14 @@ class price
     // Columns
     public function columns($cols)
     {
-        echo '<th>Price</th>';
+        echo '<th width="150">Price</th>';
     }
 
 
     // List Data
     public function load($v)
     {
-        echo '<td><abbr class="price" data-id="'.$v['id'].'">'. number_format($v['price']/100, 2, '.', '') .'</abbr> ';
+        echo '<td><abbr class="price" data-id="'.(int)$v['id'].'">'. number_format($v['price']/100, 2, '.', '') .'</abbr> ';
 
         if ($v['prevprice'])
         {
@@ -64,8 +64,8 @@ $(function(){
         popover = function(obj){
             obj.popover({
                 content     : function(){
-                    var id = $(this).data("id"),
-                        catch_data = $(this).data("popover"),
+                    var id = $(obj).data("id"),
+                        catch_data = $(obj).data("popover"),
                         chart_build = function(data){
                             var chart = AmCharts.makeChart("chart-"+id, {
                                 "theme": "none",
@@ -80,7 +80,7 @@ $(function(){
                                 "graphs": [{
                                     "type": "step",
                                     "above": true,
-                                    "balloonText": "[[value]]<br />[[category]]",
+                                    "balloonText": "[[value]]",
                                     "bullet": "round",
                                     "bulletBorderAlpha": 1,
                                     "bulletBorderColor": "#FFFFFF",
@@ -95,8 +95,16 @@ $(function(){
                                     "gridAlpha": 0,
                                     "axisAlpha": 0
                                 }],
+                                "chartCursor": {
+                                    "pan": false,
+                                    "valueLineEnabled": false,
+                                    "valueLineBalloonEnabled": false,
+                                    "categoryBalloonDateFormat": "YYYY-MM-DD",
+                                    "zoomable": false
+                                },
                                 "chartScrollbar": {
                                     "dragIcon": "dragIcon",
+                                    "oppositeAxis": false,
                                     "scrollbarHeight": 3,
                                     "backgroundAlpha": 0.1,
                                     "backgroundColor": "#868686",
@@ -106,8 +114,10 @@ $(function(){
                                 "categoryField": "time",
                                 "categoryAxis": {
                                     "parseDates": true,
+                                    "minPeriod": "mm",
                                     "axisAlpha": 0,
                                     "minHorizontalGap": 60,
+                                    "minorGridEnabled": true,
                                     "dateFormats": [{period:'fff',format:'JJ:NN:SS'},{period:'ss',format:'JJ:NN:SS'},{period:'mm',format:'JJ:NN'},{period:'hh',format:'JJ:NN'},{period:'DD',format:'MM-DD'},{period:'WW',format:'MM-DD'},{period:'MM',format:'MM'},{period:'YYYY',format:'YYYY'}]
                                 }
                             });
@@ -123,18 +133,19 @@ $(function(){
                             var div = $("#chart-"+id);
                             if (data.s == 0){
                                 div.html("");
+                                obj.data("popover", data.rs);
                                 chart_build(data.rs);
                             }else{
                                 div.children("p").html("").append("<b>Error:</b>").append(data.err);
                             }
                         }, "json");
                     } else {
-                        chart_build(catch_data);
+                        setTimeout(function(){ chart_build(catch_data); }, 100);
                     }
                     return '<div id="chart-'+id+'" style="width:360px; height:200px;"><p>Loading..</p></div>';
                 },
                 placement   : "left",
-                trigger     : "hover",
+                trigger     : "manual",
                 html        : true
             });
 
@@ -142,12 +153,13 @@ $(function(){
         };
 
         $(".table").on("mouseover", ".price", function(){
-            var td = $(this);
-            if (!td.data("popover")) {
-                popover(td).popover("show");
+            var abbr = $(this),
+                td = abbr.parent();
+            if (!abbr.data("popover")) {
+                popover(abbr).popover("show");
+                td.hover(function(){ abbr.popover("show"); }, function(){ abbr.popover("hide"); });
             }
         });
-
 
 });
 </script>
@@ -189,11 +201,14 @@ $(function(){
             $last = $db -> prepare("SELECT * FROM `a_price` WHERE `product`=:id ORDER BY `id` DESC LIMIT 0,1;") -> execute(array(':id'=>$product['id']));
             if (!$last || $last[0]['price'] != $product['price'])
             {
-                $db -> prepare("INSERT INTO `a_price` SET `price`=:price, `product`=:id, `time`=:time") -> execute(array(':id'=>$product['id'], ':price'=>$product['price'], ':time'=>NOW));
+                $db -> prepare("INSERT INTO `a_price` (`price`,`product`,`time`) VALUES (:price, :id, :time);") -> execute(array(':id'=>$product['id'], ':price'=>$product['price'], ':time'=>NOW));
 
-                $db -> prepare("UPDATE `a_good` SET `prevprice`=:price, `prevtime`=:time WHERE `id`=:id") -> execute(array(':id'=>$product['id'], ':price'=>$last[0]['price'], ':time'=>$last[0]['time']));
-                $product['prevprice'] = $last[0]['price'];
-                $product['prevtime']  = $last[0]['time'];
+                if ($last)
+                {
+                    $db -> prepare("UPDATE `a_good` SET `prevprice`=:price, `prevtime`=:time WHERE `id`=:id") -> execute(array(':id'=>$product['id'], ':price'=>$last[0]['price'], ':time'=>$last[0]['time']));
+                    $product['prevprice'] = $last[0]['price'];
+                    $product['prevtime']  = $last[0]['time'];
+                }
             }
         }
         else
