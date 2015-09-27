@@ -25,14 +25,22 @@ include(COMMON_PATH.'web_func.php');
 include(COMMON_PATH.'hook.inc.php');
 
 
+// User id
+if (empty($_SESSION['uid']))
+    json_return(null, 1, 'Please Login.');
+
+$uid = (int)$_SESSION['uid'];
+
+// set timeout seconds
 set_time_limit(config('web.refresh_timeout'));
+
 
 $db = db::init();
 
 if (!empty($_POST['id']))
 {
     // Get product data from db
-    $product = $db -> prepare("SELECT * FROM `a_good` WHERE `id`=:id") -> execute(array(':id'=>$_POST['id']));
+    $product = $db -> prepare("SELECT * FROM `a_good` WHERE `id`=:id AND `user`=:uid") -> execute(array(':id'=>$_POST['id'], ':uid'=>$uid));
     if (!$product)
         json_return(null, 1, 'Not Found any product.');
 
@@ -55,6 +63,7 @@ else if (!empty($_POST['url']))
         'cover'  => '',
         'title'  => '',
         'update' => 0,
+        'user'   => $uid,
     );
 
     list($column, $sql, $value) = array_values(insert_array($product));

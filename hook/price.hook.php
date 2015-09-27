@@ -199,7 +199,7 @@ $(function(){
 
             $db = db::init();
             $last = $db -> prepare("SELECT * FROM `a_price` WHERE `product`=:id ORDER BY `id` DESC LIMIT 0,1;") -> execute(array(':id'=>$product['id']));
-            if (!$last || $last[0]['price'] != $product['price'])
+            if (!$last || ($last[0]['price'] != $product['price'] && $last[0]['time'] < NOW - 60))
             {
                 $db -> prepare("INSERT INTO `a_price` (`price`,`product`,`time`) VALUES (:price, :id, :time);") -> execute(array(':id'=>$product['id'], ':price'=>$product['price'], ':time'=>NOW));
 

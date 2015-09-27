@@ -23,6 +23,13 @@ include(COMMON_PATH.'web_func.php');
 
 include(COMMON_PATH.'hook.inc.php');
 
+// User id
+if (empty($_SESSION['uid']))
+    redirect('./login.php');
+
+$uid = (int)$_SESSION['uid'];
+
+// Hook method
 if (!empty($_GET['hook']))
 {
     $hook = $_GET['hook'];
@@ -30,13 +37,14 @@ if (!empty($_GET['hook']))
     call_user_func(array($hook, $method));
 }
 
+// List page
 $keyword = '';
 template::assign('keyword', $keyword);
 
 $db = db::init();
 
-$sql = "SELECT * FROM `a_good` ORDER BY `id` DESC";
-$list = $db -> prepare($sql) -> execute();
+$sql = "SELECT * FROM `a_good` WHERE `user`=:uid ORDER BY `id` DESC";
+$list = $db -> prepare($sql) -> execute(array(':uid'=>$uid));
 
 template::assign('list', $list);
 template::display('index');
