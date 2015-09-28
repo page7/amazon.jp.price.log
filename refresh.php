@@ -52,17 +52,24 @@ else if (!empty($_POST['url']))
     // Request a url for create a new product.
     $url = trim($_POST['url']);
     $pos = strpos($url, '/dp/B');
+    $len = 4;
 
     if ($pos === false)
-        json_return(null, 1, 'URL is wrong.');
+    {
+        $pos = strpos($url, '/gp/product/B');
+        $len = 12;
+        if ($pos === false)
+        {
+            json_return(null, 1, 'URL is wrong.');
+        }
+    }
 
-    $pcode = substr($url, $pos+4, 10);
+    $pcode = substr($url, $pos+$len, 10);
 
     $product = array(
         'code'   => $pcode,
         'cover'  => '',
         'title'  => '',
-        'update' => 0,
         'user'   => $uid,
     );
 
@@ -76,7 +83,6 @@ else if (!empty($_POST['url']))
 }
 
 $header = array(
-    'Accept-Language: zh-CN,zh;q=0.8,en;q=0.6,zh-TW;q=0.4',
     'Cache-Control: no-cache',
     'Connection: keep-alive',
     'Cookie: x-wl-uid=1Lr1VDBg+QMxq4z5BfPosSu9RFdxChbLFQBX8yUftN8gAWBqNlhsOFQ6G3NrUOK4mz4G8rFkDJ3k=; csm-hit=14HKWNA3PA8730APBNSR+s-1SCYMR00S1KTH5F9TPVF|1443004421105; ubid-acbjp=378-5716514-8773714; session-id-time=2082726001l; session-id=376-2783175-3621837',

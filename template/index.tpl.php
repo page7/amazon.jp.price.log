@@ -160,7 +160,7 @@ $(function(){
                         $("#temp").after(tr).remove();
                         tr.trigger("create");
                     }else{
-                        $("#alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                        $(".alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
                     }
                 },
                 dataType : "json",
@@ -186,7 +186,7 @@ $(function(){
                         var _tr = $(data.rs);
                         tr.html(_tr.html()).trigger("refresh");
                     }else{
-                        $("#alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                        $(".alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
                     }
                 },
                 dataType : "json",
