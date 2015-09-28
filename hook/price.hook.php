@@ -19,7 +19,7 @@ class price
     // Columns
     public function columns($cols)
     {
-        echo '<th width="150">Price</th>';
+        echo '<th width="150">Price</th><th width="100">OFF</th>';
     }
 
 
@@ -28,15 +28,33 @@ class price
     {
         echo '<td><abbr class="price" data-id="'.(int)$v['id'].'">'. number_format($v['price']/100, 2, '.', '') .'</abbr> ';
 
+        $db = db::init();
+        $pt = $db -> prepare("SELECT MAX(`price`) AS `max`, MIN(`price`) AS `min` FROM `a_price` WHERE `product`=:id") -> execute(array(':id'=>$v['id']));
+
         if ($v['prevprice'])
         {
-            if ($v['prevtime'] > NOW - 86400 * 2)
+            if ($v['price'] == $pt[0]['min'])
+            {
+                echo '<a class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-heart"></span></a>';
+            }
+            else if ($v['prevtime'] > NOW - 86400 * 2)
             {
                 if ($v['price'] > $v['prevprice'])
-                    echo '<span class="text-danger glyphicon glyphicon-triangle-top"></span>';
+                    echo '<a class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></a>';
                 else
-                    echo '<span class="text-success glyphicon glyphicon-triangle-bottom"></span>';
+                    echo '<a class="btn btn-success btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></a>';
             }
+        }
+
+        echo '</td><td>';
+
+        if ($v['oriprice'])
+        {
+            echo round(($v['oriprice'] - $v['price']) / $v['oriprice'] * 100).'%';
+        }
+        else
+        {
+            echo round(($pt[0]['max'] - $pt[0]['max']) / $pt[0]['max'] * 100).'% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="OFF comes from the highest price in history"></span>';
         }
 
         echo '</td>';
@@ -214,6 +232,13 @@ $(function(){
         else
         {
             $product['price'] = 0;
+        }
+
+        // product's oriprice
+        preg_match('/参考価格:<\/td>\s+<td.+>￥ ([0-9,.]+?)<\/td>/i', $html, $oriprice);
+        if ($oriprice)
+        {
+            $product['oriprice'] = (int)str_replace(',', '', $oriprice[1]) * 100;
         }
 
         return $product;
