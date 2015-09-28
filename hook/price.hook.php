@@ -54,7 +54,7 @@ class price
         }
         else
         {
-            echo round(($pt[0]['max'] - $pt[0]['max']) / $pt[0]['max'] * 100).'% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="OFF comes from the highest price in history"></span>';
+            echo round(($pt[0]['max'] - $v['price']) / $pt[0]['max'] * 100).'% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="OFF comes from the highest price in history"></span>';
         }
 
         echo '</td>';
