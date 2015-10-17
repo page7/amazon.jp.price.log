@@ -240,6 +240,10 @@ $(function(){
         {
             $product['oriprice'] = (int)str_replace(',', '', $oriprice[1]) * 100;
         }
+        else
+        {
+            $product['oriprice'] = 0;
+        }
 
         return $product;
     }
