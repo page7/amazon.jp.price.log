@@ -72,6 +72,11 @@ class status
                 $product['status'] = 1;
                 $product['release'] = 0;
             }
+            else if (false !== strpos($txt, '残り'))
+            {
+                $product['status'] = 1;
+                $product['release'] = 0;
+            }
             else
             {
                 $product['status'] = -1;

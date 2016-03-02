@@ -77,7 +77,7 @@ else if (!empty($_POST['url']))
     $rs = $db -> prepare("INSERT INTO `a_good` {$column} VALUES {$sql};") -> execute($value);
 
     if (!$rs)
-        json_return(null, 1, 'Save Fail.');
+        json_return(null, 1, 'Save failed.');
 
     $product['id'] = (int)$rs;
 }

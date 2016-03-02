@@ -12,6 +12,7 @@ class price
         action::add('footer',  array($this, 'script'), 1, 1);
 
         filter::add('refresh', array($this, 'refresh'), 1, 2);
+        action::add('delete',  array($this, 'delete'), 1, 1);
     }
 
 
@@ -52,7 +53,7 @@ class price
         {
             echo round(($v['oriprice'] - $v['price']) / $v['oriprice'] * 100).'%';
         }
-        else
+        else if (!empty($pt) && $pt[0]['max'])
         {
             echo round(($pt[0]['max'] - $v['price']) / $pt[0]['max'] * 100).'% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="OFF comes from the highest price in history"></span>';
         }
@@ -139,10 +140,6 @@ $(function(){
                                     "dateFormats": [{period:'fff',format:'JJ:NN:SS'},{period:'ss',format:'JJ:NN:SS'},{period:'mm',format:'JJ:NN'},{period:'hh',format:'JJ:NN'},{period:'DD',format:'MM-DD'},{period:'WW',format:'MM-DD'},{period:'MM',format:'MM'},{period:'YYYY',format:'YYYY'}]
                                 }
                             });
-
-                            if (chart.zoomToIndexes && data.length > 10) {
-                                chart.zoomToIndexes(data.length - 10, data.length - 1);
-                            }
 
                             return chart;
                         };
@@ -248,6 +245,20 @@ $(function(){
         return $product;
     }
 
+
+
+    // Delete
+    static function delete($product)
+    {
+        $db = db::init();
+
+        $rs = $db -> prepare("DELETE FROM `a_price` WHERE `product`=:id") -> execute(array(':id'=>$product));
+        if (false === $rs)
+        {
+            $db -> rollback();
+            json_return(null, 2, 'Operation failed.');
+        }
+    }
 
 
 }

@@ -58,7 +58,7 @@
                         <th width="120">Product</th>
                         <th></th>
                         <?php \pt\tool\action::exec('columns'); ?>
-                        <th width="10%">Refresh</th>
+                        <th width="160"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -195,11 +195,72 @@ $(function(){
         });
     }("#list", ".btn-refresh");
 
+    !function(list, bindobj){
+        var list = $(list);
+        list.on("click", bindobj, function(){
+            var btn = $(this),
+                tr = btn.parents("tr").eq(0),
+                id = tr.data("id");
+            btn.prop("disabled", true).addClass("loading").html('<span class="glyphicon glyphicon-refresh"></span>');
+            $.ajax({
+                type : "POST",
+                url  : "./index.php?method=delete",
+                data : {id:id},
+                success : function(data){
+                    btn.prop("disabled", false).removeClass("loading").html('<span class="glyphicon glyphicon-trash"></span>');
+                    if (data.s == 0){
+                        tr.remove();
+                    }else{
+                        $(".alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                    }
+                },
+                dataType : "json"
+            });
+        });
+    }("#list", ".btn-delete");
+
+    !function(list, bindobj){
+        var list = $(list);
+        list.on("click", bindobj, function(){
+            var btn = $(this),
+                tr = btn.parents("tr").eq(0),
+                id = tr.data("id"),
+                status = tr.is(".disable") ? 1 : 0;
+            btn.prop("disabled", true).addClass("loading").html('<span class="glyphicon glyphicon-refresh"></span>');
+            $.ajax({
+                type : "POST",
+                url  : "./index.php?method=status",
+                data : {id:id, status:(status ? 0 : 1)},
+                success : function(data){
+                    btn.prop("disabled", false).removeClass("loading");
+                    if (data.s == 0){
+                        if (status) {
+                            tr.removeClass("disable");
+                            btn.html('<span class="glyphicon glyphicon-eye-close"></span>');
+                        }else{
+                            tr.addClass("disable");
+                            btn.html('<span class="glyphicon glyphicon-eye-open"></span>');
+                        }
+                    }else{
+                        if (!status) {
+                            btn.html('<span class="glyphicon glyphicon-eye-close"></span>');
+                        }else{
+                            btn.html('<span class="glyphicon glyphicon-eye-open"></span>');
+                        }
+                        $(".alert").text(data.err).fadeIn(200).delay(5000).fadeOut(200);
+                    }
+                },
+                dataType : "json"
+            });
+        });
+    }("#list", ".btn-status");
+
     !function(btn, btnlist){
         var btnlist = $(btnlist);
         $(btn).click(function(){
                 var refresh = function(btn){
                     var tr = btn.parents("tr").eq(0),
+                        next = tr.nextAll("tr:not(.disable)").eq(0),
                         id = tr.data("id");
                     tr.addClass("warning");
                     btn.addClass("loading");
@@ -213,12 +274,16 @@ $(function(){
                             if (data.s == 0){
                                 var _tr = $(data.rs);
                                 tr.html(_tr.html()).trigger("refresh");
-                                if (tr.next().length) {
-                                    refresh(tr.next().find(btnlist));
-                                }
+                                if (next.length) refresh(next.find(btnlist));
                             }else{
                                 tr.addClass("danger");
+                                if (next.length) refresh(next.find(btnlist));
                             }
+                        },
+                        error : function(){
+                            tr.addClass("danger");
+                            btn.prop("disabled", false).removeClass("loading");
+                            if (next.length) refresh(next.find(btnlist));
                         },
                         dataType : "json",
                         timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
@@ -227,7 +292,7 @@ $(function(){
             var first = btnlist.prop("disabled", true).eq(0);
             refresh(first);
         });
-    }(".refresh-all", ".btn-refresh");
+    }(".refresh-all", "tr:not(.disable) .btn-refresh");
 });
 </script>
 

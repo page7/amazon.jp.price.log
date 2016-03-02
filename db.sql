@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `a_good` (
   `prevtime` int(10) unsigned DEFAULT NULL,
   `status` tinyint(1) DEFAULT NULL,
   `release` int(10) unsigned DEFAULT NULL,
+  `disable` int(10) unsigned DEFAULT NULL,
   `user` int(10) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`code`),

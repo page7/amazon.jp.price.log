@@ -30,6 +30,10 @@
     animation:rotate 2s linear infinite;
 }
 
+.disable td { color:#999; opacity:0.4; }
+.disable td a { color:#999; }
+.disable td a.btn { color:#fff; }
+
 
 @media (min-width: 768px){
 	.alert-fixed { width: 720px; }
