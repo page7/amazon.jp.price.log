@@ -37,6 +37,7 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="refresh-all" href="javascript:;">Refresh All</a></li>
+                        <li><a class="toggle-disabled" href="javascript:;">Toggle Disabled</a></li>
                     </ul>
                 </div>
             </div>
@@ -81,6 +82,7 @@
                     </button>
                     <ul class="dropdown-menu">
                         <li><a class="refresh-all" href="javascript:;">Refresh All</a></li>
+                        <li><a class="toggle-disabled" href="javascript:;">Toggle Disabled</a></li>
                     </ul>
                 </div>
             </div>
@@ -293,6 +295,12 @@ $(function(){
             refresh(first);
         });
     }(".refresh-all", "tr:not(.disable) .btn-refresh");
+
+    !function(btn, li){
+        $(btn).click(function(){
+            $(li).toggle();
+        });
+    }(".toggle-disabled", "tr.disable");
 });
 </script>
 

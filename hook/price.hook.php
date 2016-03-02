@@ -197,6 +197,9 @@ $(function(){
             $data[] = array('price'=>$v['price']/100, 'time'=>date('Y-m-d H:i:s', $v['time']));
         }
 
+        if (date('Ymd') != date('Ymd', $v['time']))
+            $data[] = array('price'=>$v['price']/100, 'time'=>date('Y-m-d H:i:s', NOW));
+
         json_return($data);
     }
 
