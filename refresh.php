@@ -109,14 +109,19 @@ if (!$product['cover'] || !$product['title'])
     // preg product's title
     preg_match('/<span id="productTitle".*>(.*?)<\/span>/i', $html, $title);
 
-    if ($title[1])
+    if (!empty($title[1]))
         $product['title'] = html_entity_decode($title[1]);
 
     // preg product's cover
     preg_match('/data\:image\/jpeg;base64,(.+)/i', $html, $cover);
 
-    if ($cover[0])
+    if (!empty($cover[0]))
+    {
         $product['cover'] = trim($cover[0]);
+
+        // save picture
+        @file_put_contents(PT_PATH.'picture/'.$product['id'].'.jpg', $cover[1]);
+    }
 }
 
 $db -> beginTrans();

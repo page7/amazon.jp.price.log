@@ -22,7 +22,7 @@
 
     <?php \pt\tool\action::exec('header'); ?>
 
-    <div class="container">
+    <div class="container-fluid">
         <h1>Hi Amazon~!</h1>
 
         <div class="alert alert-danger" role="alert" style="display:none">数据保存错误</div>
@@ -43,12 +43,6 @@
             </div>
 
             <div class="col-xs-8 col-sm-6 col-md-6 col-lg-4 text-right">
-                <div class="input-group hidden-xs hidden-sm">
-                    <input type="text" name="keyword" class="form-control" value="<?php echo $keyword; ?>" />
-                    <span class="input-group-btn">
-                        <button class="btn btn-default" type="submit"><span class="glyphicon glyphicon-search"></span></button>
-                    </span>
-                </div>
             </div>
         </div>
 

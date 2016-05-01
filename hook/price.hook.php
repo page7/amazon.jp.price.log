@@ -20,7 +20,28 @@ class price
     // Columns
     public function columns($cols)
     {
-        echo '<th width="150">Price</th><th width="100">OFF</th>';
+        echo '<th width="150">Price</th>';
+
+        if (!empty($_GET['rate']) || !empty($_SESSION['rate']))
+        {
+            if (!empty($_GET['rate']))
+                $_SESSION['rate'] = $_GET['rate'];
+        }
+
+            echo '<th width="150">
+<div class="btn-group">
+  <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding:0px; font-weight:bold; color:#000;">
+    '. (empty($_SESSION['rate']) ? 'CNY' : $_SESSION['rate']) . ' <span class="caret"></span>
+  </button>
+  <ul class="dropdown-menu">
+    <li><a href="?rate=USD">USD</a></li>
+    <li><a href="?rate=EUR">EUR</a></li>
+    <li><a href="?rate=CNY">CNY</a></li>
+  </ul>
+</div>
+</th>';
+
+        echo '<th width="100">OFF</th>';
     }
 
 
@@ -49,6 +70,11 @@ class price
 
         echo '</td><td>';
 
+        $rate = self::exchange(empty($_SESSION['rate']) ? 'CNY' : $_SESSION['rate']);
+        echo number_format($v['price'] * $rate/100, 2, '.', '');
+
+        echo '</td><td>';
+
         if ($v['oriprice'])
         {
             echo round(($v['oriprice'] - $v['price']) / $v['oriprice'] * 100).'%';
@@ -59,6 +85,47 @@ class price
         }
 
         echo '</td>';
+    }
+
+
+    // exchange rate
+    static protected function exchange($to, $from='JPY')
+    {
+        static $rate = 0;
+
+        if ($rate)
+            return $rate;
+
+        $log = PT_PATH.'log/'.$from.'_'.$to.'.rate';
+        if (file_exists($log) && date('Ymd', filemtime($log)) == date('Ymd'))
+        {
+            $rate = file_get_contents($log);
+        }
+        else
+        {
+            $i = 0;
+            while (true)
+            {
+                $i ++;
+                if ($i >= 10) return false;
+
+                $json = curl_file_get_contents("http://free.currencyconverterapi.com/api/v3/convert?q={$from}_{$to}&compact=y");
+                if (!$json)
+                    continue;
+
+                $data = json_decode($json, true);
+                if (!$data || !$data["{$from}_{$to}"])
+                    continue;
+
+                $rate = $data["{$from}_{$to}"]['val'];
+
+                file_put_contents($log, $rate);
+
+                break;
+            }
+        }
+
+        return $rate;
     }
 
 
