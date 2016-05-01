@@ -71,6 +71,7 @@ else if (!empty($_POST['url']))
         'cover'  => '',
         'title'  => '',
         'user'   => $uid,
+        'disable'=> 0,
     );
 
     list($column, $sql, $value) = array_values(insert_array($product));
@@ -120,7 +121,7 @@ if (!$product['cover'] || !$product['title'])
         $product['cover'] = trim($cover[0]);
 
         // save picture
-        @file_put_contents(PT_PATH.'picture/'.$product['id'].'.jpg', $cover[1]);
+        @file_put_contents(PT_PATH.'picture/'.$product['id'].'.jpg', base64_decode($cover[1]));
     }
 }
 

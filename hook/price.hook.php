@@ -53,7 +53,7 @@ class price
         $db = db::init();
         $pt = $db -> prepare("SELECT MAX(`price`) AS `max`, MIN(`price`) AS `min` FROM `a_price` WHERE `product`=:id") -> execute(array(':id'=>$v['id']));
 
-        if ($v['prevprice'])
+        if (!empty($v['prevprice']))
         {
             if ($v['price'] == $pt[0]['min'])
             {
