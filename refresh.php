@@ -108,10 +108,10 @@ if (!$html)
 if (!$product['cover'] || !$product['title'])
 {
     // preg product's title
-    preg_match('/<span id="productTitle".*>(.*?)<\/span>/i', $html, $title);
+    preg_match('/<span id="productTitle".*?>(.*?)<\/span>/is', $html, $title);
 
     if (!empty($title[1]))
-        $product['title'] = html_entity_decode($title[1]);
+        $product['title'] = html_entity_decode(trim($title[1]));
 
     // preg product's cover
     preg_match('/data\:image\/jpeg;base64,(.+)/i', $html, $cover);
