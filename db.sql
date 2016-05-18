@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `a_good` (
   `code` varchar(20) NOT NULL,
   `cover` text,
   `title` varchar(300) DEFAULT NULL,
+  `star` varchar(3) DEFAULT NULL,
   `oriprice` int(10) unsigned DEFAULT NULL,
   `maxprice` int(10) unsigned DEFAULT NULL,
   `price` int(10) unsigned DEFAULT NULL,

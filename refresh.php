@@ -68,8 +68,10 @@ else if (!empty($_POST['url']))
 
     $product = array(
         'code'   => $pcode,
-        'cover'  => '',
+        'url'    => '',
+        'cover'  => 0,
         'title'  => '',
+        'star'   => '',
         'user'   => $uid,
         'disable'=> 0,
     );
@@ -101,7 +103,23 @@ if (config('web.proxy'))
 }
 
 // load page
-$html = curl_file_get_contents('http://www.amazon.co.jp/dp/'.$product['code'], null, $header, config('web.refresh_timeout'), $proxy);
+if (!$product['url'])
+{
+    $html = curl_file_get_contents('http://www.amazon.co.jp/dp/'.$product['code'], null, $header, config('web.refresh_timeout'), $proxy);
+
+    sleep(1);
+
+    if (preg_match('/Location: (.*)/i', $html, $url))
+    {
+        $product['url'] = str_replace('https://', 'http://', trim($url[1]));
+        $html = curl_file_get_contents($product['url'], null, $header, config('web.refresh_timeout'), $proxy);
+    }
+}
+else
+{
+    $html = curl_file_get_contents($product['url'], null, $header, config('web.refresh_timeout'), $proxy);
+}
+
 if (!$html)
     json_return(null, 1, 'Load page\'s data fail, please retry.');
 
@@ -118,12 +136,19 @@ if (!$product['cover'] || !$product['title'])
 
     if (!empty($cover[0]))
     {
-        $product['cover'] = trim($cover[0]);
+        $product['cover'] = 1;//trim($cover[0]);
 
         // save picture
         @file_put_contents(PT_PATH.'picture/'.$product['id'].'.jpg', base64_decode($cover[1]));
     }
 }
+
+// preg product's star
+if(preg_match('/5つ星のうち ([0-9.]+)/i', $html, $star))
+{
+    $product['star'] = $star[1];
+}
+
 
 $db -> beginTrans();
 

@@ -176,8 +176,11 @@ $(function(){
                 type : "POST",
                 url  : "./refresh.php",
                 data : {id:id},
-                success : function(data){
+                complete : function(){
+                    tr.removeClass("warning danger");
                     btn.prop("disabled", false).removeClass("loading");
+                },
+                success : function(data){
                     if (data.s == 0){
                         var _tr = $(data.rs);
                         tr.html(_tr.html()).trigger("refresh");
@@ -227,8 +230,10 @@ $(function(){
                 type : "POST",
                 url  : "./index.php?method=status",
                 data : {id:id, status:(status ? 0 : 1)},
-                success : function(data){
+                complete : function(){
                     btn.prop("disabled", false).removeClass("loading");
+                },
+                success : function(data){
                     if (data.s == 0){
                         if (status) {
                             tr.removeClass("disable");
@@ -264,22 +269,21 @@ $(function(){
                         type : "POST",
                         url  : "./refresh.php",
                         data : {id:id},
-                        success : function(data){
-                            tr.removeClass("warning");
+                        complete : function(){
+                            tr.removeClass("warning danger");
                             btn.prop("disabled", false).removeClass("loading");
+                            if (next.length) refresh(next.find(btnlist));
+                        },
+                        success : function(data){
                             if (data.s == 0){
                                 var _tr = $(data.rs);
                                 tr.html(_tr.html()).trigger("refresh");
-                                if (next.length) refresh(next.find(btnlist));
                             }else{
                                 tr.addClass("danger");
-                                if (next.length) refresh(next.find(btnlist));
                             }
                         },
                         error : function(){
                             tr.addClass("danger");
-                            btn.prop("disabled", false).removeClass("loading");
-                            if (next.length) refresh(next.find(btnlist));
                         },
                         dataType : "json",
                         timeout : <?php echo config('web.refresh_timeout') * 1000; ?>

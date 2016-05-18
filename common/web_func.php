@@ -125,6 +125,7 @@ function curl_file_get_contents($url, $post=null, $header=array(), $timeout=5, $
         curl_setopt($ch, CURLOPT_POST, 1);
         curl_setopt($ch, CURLOPT_POSTFIELDS, is_array($post) ? http_build_query($post) : $post);
     }
+    curl_setopt($ch, CURLOPT_HEADER, true);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
     $content = curl_exec($ch);
     curl_close($ch);
