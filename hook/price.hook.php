@@ -97,6 +97,7 @@ class price
             return $rate;
 
         $log = PT_PATH.'log/'.$from.'_'.$to.'.rate';
+
         if (file_exists($log) && date('Ymd', filemtime($log)) == date('Ymd'))
         {
             $rate = file_get_contents($log);

@@ -105,7 +105,7 @@ if (config('web.proxy'))
 // load page
 if (!$product['url'])
 {
-    $html = curl_file_get_contents('http://www.amazon.co.jp/dp/'.$product['code'], null, $header, config('web.refresh_timeout'), $proxy);
+    $html = curl_file_get_contents('http://www.amazon.co.jp/dp/'.$product['code'], null, $header, config('web.refresh_timeout'), $proxy, true);
 
     sleep(1);
 
