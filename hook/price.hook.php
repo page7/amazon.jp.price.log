@@ -20,7 +20,7 @@ class price
     // Columns
     public function columns($cols)
     {
-        echo '<th width="150">Price</th>';
+        echo '<th width="150" class="sort">Price</th>';
 
         if (!empty($_GET['rate']) || !empty($_SESSION['rate']))
         {
@@ -30,7 +30,7 @@ class price
 
             echo '<th width="150">
 <div class="btn-group">
-  <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding:0px; font-weight:bold; color:#000;">
+  <button type="button" class="btn btn-link dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="padding:0px; font-weight:bold; color:#000; border:0; line-height:1;">
     '. (empty($_SESSION['rate']) ? 'CNY' : $_SESSION['rate']) . ' <span class="caret"></span>
   </button>
   <ul class="dropdown-menu">
@@ -41,14 +41,14 @@ class price
 </div>
 </th>';
 
-        echo '<th width="100">OFF</th>';
+        echo '<th width="100" class="sort">OFF</th>';
     }
 
 
     // List Data
     public function load($v)
     {
-        echo '<td><abbr class="price" data-id="'.(int)$v['id'].'">'. number_format($v['price']/100, 2, '.', '') .'</abbr> ';
+        echo '<td data-sort="'.$v['price'].'"><abbr class="price" data-id="'.(int)$v['id'].'">'. number_format($v['price']/100, 2, '.', '') .'</abbr> ';
 
         $db = db::init();
         $pt = $db -> prepare("SELECT MAX(`price`) AS `max`, MIN(`price`) AS `min` FROM `a_price` WHERE `product`=:id") -> execute(array(':id'=>$v['id']));
@@ -57,14 +57,14 @@ class price
         {
             if ($v['price'] == $pt[0]['min'])
             {
-                echo '<a class="btn btn-danger btn-xs"><span class="glyphicon glyphicon-heart"></span></a>';
+                echo '<span style="color:#d9534f;" class="glyphicon glyphicon-heart"></span>';
             }
             else if ($v['prevtime'] > NOW - 86400 * 2)
             {
                 if ($v['price'] > $v['prevprice'])
-                    echo '<a class="btn btn-warning btn-xs"><span class="glyphicon glyphicon-arrow-up"></span></a>';
+                    echo '<span style="color:#f0ad4e;" class="glyphicon glyphicon-arrow-up"></span>';
                 else
-                    echo '<a class="btn btn-success btn-xs"><span class="glyphicon glyphicon-arrow-down"></span></a>';
+                    echo '<span style="color:#5cb85c;" class="glyphicon glyphicon-arrow-down"></span>';
             }
         }
 
@@ -73,15 +73,23 @@ class price
         $rate = self::exchange(empty($_SESSION['rate']) ? 'CNY' : $_SESSION['rate']);
         echo number_format($v['price'] * $rate/100, 2, '.', '');
 
-        echo '</td><td>';
+        echo '</td>';
 
-        if ($v['oriprice'])
+        if (!$v['price'])
         {
-            echo round(($v['oriprice'] - $v['price']) / $v['oriprice'] * 100).'%';
+            echo '<td data-sort="0">0 %';
+        }
+        else if ($v['oriprice'])
+        {
+            $s = round(($v['oriprice'] - $v['price']) / $v['oriprice'] * 100);
+            echo $s >= 30 ? '<td style="color:#d9534f;" data-sort="'.$s.'">' : '<td data-sort="'.$s.'">';
+            echo $s, '%';
         }
         else if (!empty($pt) && $pt[0]['max'])
         {
-            echo round(($pt[0]['max'] - $v['price']) / $pt[0]['max'] * 100).'% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="OFF comes from the highest price in history"></span>';
+            $s = round(($pt[0]['max'] - $v['price']) / $pt[0]['max'] * 100);
+            echo $s > 30 ? '<td style="color:#d9534f;" data-sort="'.$s.'">' : '<td data-sort="'.$s.'">';
+            echo $s, '% <span class="glyphicon glyphicon-question-sign" style="font-size:12px; color:#999;" title="by highest price in history"></span>';
         }
 
         echo '</td>';

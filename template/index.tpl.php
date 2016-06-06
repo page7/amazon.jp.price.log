@@ -28,7 +28,7 @@
         <div class="alert alert-danger" role="alert" style="display:none">数据保存错误</div>
 
         <div class="row operate operate-header" style="margin-top:20px;">
-            <div class="col-xs-4 col-sm-6 col-md-6 col-lg-8 form-inline">
+            <div class="col-xs-5 col-sm-6 col-md-6 col-lg-8 form-inline">
                 <div class="btn-group">
                     <button type="button" class="btn btn-default"  data-toggle="modal" data-target="#add">Add New</button>
                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -42,16 +42,16 @@
                 </div>
             </div>
 
-            <div class="col-xs-8 col-sm-6 col-md-6 col-lg-4 text-right">
+            <div class="col-xs-7 col-sm-6 col-md-6 col-lg-4 text-right">
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table id="list" class="table table-striped" style="margin-top:20px;">
+        <div class="table-responsive" style="margin-top:20px;">
+            <table id="list" class="table table-striped">
                 <thead>
                     <tr>
                         <th width="120">Product</th>
-                        <th></th>
+                        <th class="hidden-xs"></th>
                         <?php \pt\tool\action::exec('columns'); ?>
                         <th width="160"></th>
                     </tr>
@@ -67,7 +67,7 @@
         </div>
 
         <div class="row operate operate-footer" style="margin-top:20px; padding-bottom:30px;">
-            <div class="col-xs-4 col-sm-6 col-md-6 col-lg-8 form-inline">
+            <div class="col-xs-5 col-sm-6 col-md-6 col-lg-8 form-inline">
                 <div class="btn-group">
                     <button type="button" class="btn btn-default"  data-toggle="modal" data-target="#add">Add New</button>
                     <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -165,6 +165,8 @@ $(function(){
         });
     }("#add .modal-footer .btn-primary", "#url", "#list");
 
+
+    // Refresh
     !function(list, bindobj){
         var list = $(list);
         list.on("click", bindobj, function(){
@@ -194,6 +196,8 @@ $(function(){
         });
     }("#list", ".btn-refresh");
 
+
+    // Delete
     !function(list, bindobj){
         var list = $(list);
         list.on("click", bindobj, function(){
@@ -218,6 +222,8 @@ $(function(){
         });
     }("#list", ".btn-delete");
 
+
+    // Status
     !function(list, bindobj){
         var list = $(list);
         list.on("click", bindobj, function(){
@@ -256,6 +262,52 @@ $(function(){
         });
     }("#list", ".btn-status");
 
+
+    // Sort
+    !function(list, filter){
+        var list = $(list);
+        list.find(filter).append("<span class=\"glyphicon glyphicon-sort\"></span>");
+        list.on("click", filter, function(){
+            var th = $(this),
+                index = th.prevAll().length,
+                _tr = [], _data = [], _id = [];
+            list.children("tbody").children("tr").each(function(i){
+                var td = $(this).children("td").eq(index),
+                    tr = td.parent(),
+                    id = tr.data("id"),
+                    data = td.data("sort");
+                _data.push(data + "." + i);
+                _id.push(id + "." + i);
+                _tr.push(tr);
+            });
+
+            list.find(filter).not(th).attr("class", "sort");
+
+            var sort = function(a, b){ return a-b; }
+
+            if (th.is(".sort-up")) {
+                _data.sort(sort).reverse();
+                th.attr("class", "sort sort-down");
+                th.children(".glyphicon").attr("class", "glyphicon glyphicon-sort-by-attributes-alt");
+            } else if (th.is(".sort-down")) {
+                _data = _id;
+                _data.sort(sort).reverse();
+                th.attr("class", "sort");
+                th.children(".glyphicon").attr("class", "glyphicon glyphicon-sort");
+            } else {
+                _data.sort(sort);
+                th.attr("class", "sort sort-up");
+                th.children(".glyphicon").attr("class", "glyphicon glyphicon-sort-by-attributes");
+            }
+
+            for(x in _data){
+                var d = _data[x].split("."), index = d[1];
+                _tr[index].appendTo(list.children("tbody"));
+            }
+        });
+    }("#list", ".sort");
+
+
     !function(btn, btnlist){
         var btnlist = $(btnlist);
         $(btn).click(function(){
@@ -293,6 +345,7 @@ $(function(){
             refresh(first);
         });
     }(".refresh-all", "tr:not(.disable) .btn-refresh");
+
 
     !function(btn, li){
         $(btn).click(function(){
