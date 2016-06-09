@@ -204,7 +204,8 @@ $(function(){
                                     "backgroundAlpha": 0.1,
                                     "backgroundColor": "#868686",
                                     "selectedBackgroundColor": "#337ab7",
-                                    "selectedBackgroundAlpha": 0.5
+                                    "selectedBackgroundAlpha": 0.5,
+                                    "updateOnReleaseOnly": true
                                 },
                                 "categoryField": "time",
                                 "categoryAxis": {

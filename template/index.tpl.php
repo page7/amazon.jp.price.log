@@ -308,10 +308,11 @@ $(function(){
     }("#list", ".sort");
 
 
-    !function(btn, btnlist){
-        var btnlist = $(btnlist);
+    !function(btn, btns){
+        var filter = btns;
         $(btn).click(function(){
-                var refresh = function(btn){
+            var btnlist = $(filter),
+                refresh = function(btn){
                     var tr = btn.parents("tr").eq(0),
                         next = tr.nextAll("tr:not(.disable)").eq(0),
                         id = tr.data("id");
@@ -340,11 +341,11 @@ $(function(){
                         dataType : "json",
                         timeout : <?php echo config('web.refresh_timeout') * 1000; ?>
                     });
-                };
-            var first = btnlist.prop("disabled", true).eq(0);
+                },
+                first = btnlist.prop("disabled", true).eq(0);
             refresh(first);
         });
-    }(".refresh-all", "tr:not(.disable) .btn-refresh");
+    }(".refresh-all", "#list tr:not(.disable) .btn-refresh");
 
 
     !function(btn, li){

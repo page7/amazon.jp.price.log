@@ -88,10 +88,21 @@ else if (!empty($_POST['url']))
 $header = array(
     'Cache-Control: no-cache',
     'Connection: keep-alive',
-    'Cookie: x-wl-uid=1Lr1VDBg+QMxq4z5BfPosSu9RFdxChbLFQBX8yUftN8gAWBqNlhsOFQ6G3NrUOK4mz4G8rFkDJ3k=; csm-hit=14HKWNA3PA8730APBNSR+s-1SCYMR00S1KTH5F9TPVF|1443004421105; ubid-acbjp=378-5716514-8773714; session-id-time=2082726001l; session-id=376-2783175-3621837',
     'Pragma: no-cache',
     'User-Agent: Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.93 Safari/537.36',
 );
+
+$cookies = array();
+$cookie_file = PT_PATH.'log/amz_cookie.log';
+if (file_exists($cookie_file))
+    $cookies = include $cookie_file;
+
+$_cookie = '';
+foreach ($cookies as $k => $v)
+    $_cookie .= "{$k}={$v}; ";
+
+$header[] = 'Cookie: '.trim($_cookie);
+
 
 $proxy = array();
 if (config('web.proxy'))
@@ -111,8 +122,32 @@ if (!$product['url'])
 
     if (preg_match('/Location: (.*)/i', $html, $url))
     {
-        $product['url'] = str_replace('https://', 'http://', trim($url[1]));
-        $html = curl_file_get_contents($product['url'], null, $header, config('web.refresh_timeout'), $proxy);
+        preg_match_all('/Set-cookie: (.*)/i', $html, $setcookies);
+        if (!empty($setcookies[1]))
+        {
+            foreach ($setcookies[1] as $value)
+            {
+                $value = explode(';', $value);
+                foreach ($value as $v)
+                {
+                    list($key, $val) = explode('=', trim($v), 2);
+                    $cookies[$key] = $val;
+                    break;
+                }
+            }
+
+            file_put_contents($cookie_file, '<?php return ' . var_export($cookies, true) . ';');
+
+            $_cookie = '';
+            foreach ($cookies as $k => $v)
+                $_cookie .= "{$k}={$v}; ";
+
+            array_pop($header);
+            $header[] = 'Cookie: '.trim($_cookie);
+        }
+
+        $product['url'] = trim($url[1]);
+        $html = curl_file_get_contents($product['url'], null, $header, config('web.refresh_timeout'), $proxy, true);
     }
 }
 else
